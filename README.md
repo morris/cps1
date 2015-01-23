@@ -39,7 +39,6 @@ The decision is arbitrary, but arguments after the callback __must be ignored__.
   - 2.5.3. `()` if `N = 0`
 - 2.6. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
 - 2.7. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
-
 - 2.8. When `err` is truthy, it should be an object containing error and exception details.
 - 2.9. A CPS1 function should __immediately throw__ programmer errors, e.g. argument errors.
   - 2.9.1. In particular, it should immediately throw an argument error in case that the `callback` argument is neither a function nor `undefined`.
