@@ -15,12 +15,12 @@ Otherwise, the specification is portable.
 
 ## 1. Terminology
 
-- 1.1. A _function_ is any JavaScript function.
-- 1.2. A _value_ is any JavaScript value, including functions.
-- 1.3. _Truthy_ is any value that is considered true in JavaScript.
-- 1.4. _To ignore (an argument)_ means to execute a function regardless of that argument.
+- 1.1. A __function__ is any JavaScript function.
+- 1.2. A __value__ is any JavaScript value, including functions.
+- 1.3. __Truthy__ is any value that is considered true in JavaScript.
+- 1.4. __To ignore (an argument)__ means to execute a function regardless of that argument.
 Presence or value of the argument must not have effect on the execution.
-- 1.5. _CPS1_ is short for Continuation-Passing Style 1.
+- 1.5. __CPS1__ is short for Continuation-Passing Style 1.
 
 
 ## 2. CPS1 Functions
