@@ -1,6 +1,6 @@
 # Continuation-Passing Style 1 (CPS1)
 
-__Specification Draft__
+__Open Specification Draft__
 
 Continuation-passing style (CPS) is the predominant way of handling asynchronous operations in JavaScript, especially in [Node.js](http://nodejs.org/).
 CPS functions expect one or more callbacks, or continuations, that continue the program flow after certain events.
