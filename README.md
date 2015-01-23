@@ -24,25 +24,26 @@ Otherwise, the specification is portable.
 
 ## 2. CPS1 Functions
 
-A CPS1 function expects a callback as its last argument,
+A CPS1 function expects a (possibly optional) callback as its last argument,
 and it must call the callback exactly once,
 either with an error or with a constant number of arguments.
 
-- 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following (2.2. to 2.7.):
+- 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following:
 - 2.2. When `f` is called, `f` must decide which argument may hold the `callback`, if any.
 The decision is arbitrary, but arguments after the callback __must be ignored__.
-- 2.3. If `callback` is not a function, it __must be ignored__.
-- 2.4. If `callback` is a function, it must be eventually called __exactly once__.
-- 2.5. `callback` must be called with one of the following argument lists:
-  - 2.5.1. `( err, arg1, arg2, ..., argN )` with arbitrary values
-  - 2.5.2. `( err )` where `err` is truthy
-  - 2.5.3. `()` if `N = 0`
-- 2.6. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
-- 2.7. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
-- 2.8. When `err` is truthy, it should be an object containing error and exception details.
-- 2.9. A CPS1 function should __immediately throw__ programmer errors, e.g. argument errors.
-  - 2.9.1. In particular, it should immediately throw an argument error in case that the `callback` argument is neither a function nor `undefined`.
-- 2.10. Other errors and exceptions should not be thrown, and instead be catched and passed to `callback( err )`.
+- 2.3. If `callback` is a function, it must be eventually called __exactly once__.
+- 2.4. `callback` must be called with one of the following argument lists:
+  - 2.4.1. `( err, arg1, arg2, ..., argN )` with arbitrary values
+  - 2.4.2. `( err )` where `err` is truthy
+  - 2.4.3. `()` if `N = 0`
+- 2.5. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
+- 2.6. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
+- 2.7. `callback` should be an optional argument. If omitted, `f` should treat it like a `noop`, i.e. `function() {}`.
+- 2.8. `f` should __immediately throw__ programmer errors, e.g. argument errors.
+  - 2.8.1. In particular, if `callback` is optional, it should immediately throw an argument error if it is neither a function nor `undefined`.
+  - 2.8.2. Otherwise, it should immediately throw an argument error if `callback` is not a function.
+- 2.9. Other errors and exceptions should not be thrown, and instead be catched and passed to `callback( err )`.
+- 2.10. When `err` is truthy, it should be an object containing error and exception details.
 
 ## 3. CPS1 Callbacks
 
@@ -53,9 +54,9 @@ A CPS1 callback must ignore any arguments if an error is passed.
 
 ## 4. Notes
 
-- 4.1. Point 2.2. supports a variable number of arguments and complex argument mappings,
+- 4.1. Point 2.2. supports a variable number of arguments and arbitrary argument mappings,
 but forces the callback to be the last argument.
-- 4.2. Point 2.5. is designed to ensure the number of callback arguments is constant,
+- 4.2. Point 2.4. is designed to ensure the number of callback arguments is constant,
 while providing shortcuts for success, errors and passthroughs.
 - 4.3. The term "CPS1" was chosen because the defined functions expect a single callback which is called exactly once.
 
@@ -66,22 +67,19 @@ while providing shortcuts for success, errors and passthroughs.
 // 5.1
 // setTimeout is not CPS1
 // Violates 2.2.: Callback is not last argument
-// Violates 2.3.: Callback cannot be omitted
 // function setTimeout( callback, t )
 
 // CPS1
 function setTimeoutCPS1( t, callback ) {
 
-	callback = callback || function() {};
 	return setTimeout( callback, t );
 
 }
 
 
 // 5.2
-// Not a CPS1 function
-// Violates 2.5.: Number of callback arguments is not constant, no such N
-// Violates 2.3.: Callback cannot be omitted
+// func is not a CPS1 function
+// Violates 2.4.: Number of callback arguments is not constant, no such N
 function func( one, two, callback ) {
 
 	if ( !two ) callback( null, one );
@@ -92,8 +90,6 @@ function func( one, two, callback ) {
 // CPS1, N = 2
 function funcCPS1( one, two, callback ) {
 
-	callback = callback || function() {};
-
 	if ( !two ) callback( null, one, undefined );
 	else callback( null, one, two );
 
@@ -101,12 +97,11 @@ function funcCPS1( one, two, callback ) {
 
 
 // 5.3
-// Not a CPS1 callback
+// ready is not a CPS1 callback
 // Violates 3.2.: Must ignore data on error
 load( function ready( err, data ) {
 
 	if ( err ) console.warn( err );
-
 	console.log( data );
 
 } );
