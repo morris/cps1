@@ -9,7 +9,7 @@ and eventually got specified with [Promises/A+](https://promisesaplus.com/),
 but even after Node.js went back to CPS, it always lacked a detailed specification.
 
 This specification defines a subset of well-formed CPS functions and callbacks and their behavior, named __CPS1__.
-It is being designed to match Node.js which widely uses a __single, error-first callback__ for CPS.
+It is being designed to match Node.js which widely uses __single, error-first callbacks__ for CPS.
 Otherwise, the specification is portable.
 
 
