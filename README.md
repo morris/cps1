@@ -24,15 +24,15 @@ Otherwise, the specification is portable.
 
 ## 2. CPS1 Functions
 
-- 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following:
+- 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following (2.2. to 2.7.):
 - 2.2. When `f` is called, `f` must decide which argument may hold the `callback`, if any.
 The decision is arbitrary, but arguments after the callback __must be ignored__.
 - 2.3. If `callback` is not a function, it __must be ignored__.
 - 2.4. If `callback` is a function, it must be eventually called __exactly once__.
 - 2.5. `callback` must be called with one of the following argument lists:
   - 2.5.1. `( err, arg1, arg2, ..., argN )` with arbitrary values
-  - 2.5.2. `( err )` only if `err` is truthy
-  - 2.5.3. `()` only if `N = 0`
+  - 2.5.2. `( err )` where `err` is truthy
+  - 2.5.3. `()` if `N = 0`
 - 2.6. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
 - 2.7. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
 
@@ -55,7 +55,8 @@ The decision is arbitrary, but arguments after the callback __must be ignored__.
 
 - 5.1. Point 2.2. supports a variable number of arguments and complex argument mappings,
 but forces the callback to be the last argument.
-- 5.2. Point 2.5. is designed to fix the number of result arguments while providing shortcuts for success, errors and passthroughs.
+- 5.2. Point 2.5. is designed to ensure the number of callback arguments is constant,
+while providing shortcuts for success, errors and passthroughs.
 - 5.3. The term "CPS1" was chosen because the defined functions expect a single callback which is called exactly once.
 
 
@@ -79,12 +80,12 @@ function setTimeoutCPS1( t, callback ) {
 
 // 6.2
 // Not a CPS1 function
-// Violates 2.5.: Number of arguments is not constant, no such N
+// Violates 2.5.: Number of callback arguments is not constant, no such N
 // Violates 2.3.: Callback cannot be omitted
 function func( one, two, callback ) {
 
-	callback( null, one );
-	callback( null, one, two );
+	if ( !two ) callback( null, one );
+	else callback( null, one, two );
 
 }
 
@@ -92,8 +93,9 @@ function func( one, two, callback ) {
 function funcCPS1( one, two, callback ) {
 
 	callback = callback || function() {};
-	callback( null, one, null );
-	callback( null, one, two );
+
+	if ( !two ) callback( null, one, undefined );
+	else callback( null, one, two );
 
 }
 
