@@ -24,6 +24,10 @@ Otherwise, the specification is portable.
 
 ## 2. CPS1 Functions
 
+A CPS1 function expects a callback as its last argument,
+and it must call the callback exactly once,
+either with an error or with a constant number of arguments.
+
 - 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following (2.2. to 2.7.):
 - 2.2. When `f` is called, `f` must decide which argument may hold the `callback`, if any.
 The decision is arbitrary, but arguments after the callback __must be ignored__.
@@ -36,34 +40,31 @@ The decision is arbitrary, but arguments after the callback __must be ignored__.
 - 2.6. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
 - 2.7. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
 
+- 2.8. When `err` is truthy, it should be an object containing error and exception details.
+- 2.9. A CPS1 function should __immediately throw__ programmer errors, e.g. argument errors.
+  - 2.9.1. In particular, it should immediately throw an argument error in case that the `callback` argument is neither a function nor `undefined`.
+- 2.10. Other errors and exceptions should not be thrown, and instead be catched and passed to `callback( err )`.
 
 ## 3. CPS1 Callbacks
+
+A CPS1 callback must ignore any arguments if an error is passed.
 
 - 3.1. A function `callback` is a __CPS1 callback__ if it conforms to the following:
 - 3.2. When `callback` is called, and the first argument `err` is truthy, all remaining arguments __must be ignored__.
 
+## 4. Notes
 
-## 4. Recommendations
-
-- 4.1. When `err` is truthy, it should be an object containing error and exception details.
-- 4.2. A CPS1 function should __immediately throw__ programmer errors, e.g. argument errors.
-  - 4.2.1. In particular, it should immediately throw an argument error in case that the `callback` argument is neither a function nor `undefined`.
-- 4.3. Other errors and exceptions should not be thrown, and instead be catched and passed to `callback( err )`.
-
-
-## 5. Notes
-
-- 5.1. Point 2.2. supports a variable number of arguments and complex argument mappings,
+- 4.1. Point 2.2. supports a variable number of arguments and complex argument mappings,
 but forces the callback to be the last argument.
-- 5.2. Point 2.5. is designed to ensure the number of callback arguments is constant,
+- 4.2. Point 2.5. is designed to ensure the number of callback arguments is constant,
 while providing shortcuts for success, errors and passthroughs.
-- 5.3. The term "CPS1" was chosen because the defined functions expect a single callback which is called exactly once.
+- 4.3. The term "CPS1" was chosen because the defined functions expect a single callback which is called exactly once.
 
 
-## 6. Examples
+## 5. Examples
 
 ```javascript
-// 6.1
+// 5.1
 // setTimeout is not CPS1
 // Violates 2.2.: Callback is not last argument
 // Violates 2.3.: Callback cannot be omitted
@@ -78,7 +79,7 @@ function setTimeoutCPS1( t, callback ) {
 }
 
 
-// 6.2
+// 5.2
 // Not a CPS1 function
 // Violates 2.5.: Number of callback arguments is not constant, no such N
 // Violates 2.3.: Callback cannot be omitted
@@ -100,7 +101,7 @@ function funcCPS1( one, two, callback ) {
 }
 
 
-// 6.3
+// 5.3
 // Not a CPS1 callback
 // Violates 3.2.: Must ignore data on error
 load( function ready( err, data ) {
@@ -120,19 +121,19 @@ load( function readyCPS1( err, data ) {
 } );
 ```
 
-## 7. License
+## 6. License
 
 This work is dedicated to the public domain.
 
 https://creativecommons.org/publicdomain/zero/1.0/
 
 
-## 8. Contributors
+## 7. Contributors
 
 - [Morris Brodersen](mailto:mb@morrisbrodersen.de)
 
 
-## 9. Acknowledgments
+## 8. Acknowledgments
 
 - http://thenodeway.io/posts/understanding-error-first-callbacks/
 - https://promisesaplus.com/
