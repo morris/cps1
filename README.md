@@ -6,60 +6,89 @@ Continuation-passing style (CPS) is the predominant way of handling asynchronous
 CPS functions expect one or more callbacks, or continuations, that continue the program flow after certain events.
 Promises moved in and out of the Node.js core,
 and eventually got specified with [Promises/A+](https://promisesaplus.com/),
-but even after Node.js went back to CPS, it always lacked a detailed specification.
+but even after Node.js went back, the style used in Node.js has not been specified.
 
-This specification defines a subset of well-formed CPS functions and callbacks and their behavior, named __CPS1__.
-It is being designed to match Node.js which widely uses __single, error-first callbacks__ for CPS.
-Otherwise, the specification is portable.
+The CPS specified in this document is named __CPS1__ because it was designed to match Node.js
+which widely uses a __single callback, error-first&nbsp;CPS__.
 
 
-## 1. Terminology
+## 1. Preliminaries
 
 - 1.1. A __function__ is any JavaScript function.
 - 1.2. A __value__ is any JavaScript value, including functions.
-- 1.3. __Truthy__ is any value that is considered true in JavaScript.
-- 1.4. __To ignore (an argument)__ means to execute a function regardless of that argument.
-Presence or value of the argument must not have effect on the execution.
-- 1.5. __CPS1__ is short for Continuation-Passing Style 1.
+- 1.3. A value is __truthy__ if it is considered _true_ in JavaScript.
+- 1.4. A value is __falsy__ if it is not truthy.
+- 1.5. A __function call__ is the evaluation of a function by any means,
+including but not limited to `f(...)`, `call`, and `apply`.
+- 1.6. An __argument__ is an entry in the `arguments` list of a function call.
+- 1.7. In a function call, an argument is the __semantically last argument__
+if all following arguments are ignored,
+i.e. neither presence nor value may have effect on the function call.
 
 
-## 2. CPS1 Functions
+## 2. CPS1 Operations
 
-A CPS1 function expects a (possibly optional) callback as its last argument,
-and it must call the callback exactly once,
-either with an error or with a constant number of arguments.
+A CPS1 operation is a hereby specified sequence of events and actions:
 
-- 2.1. A function `f` is a __CPS1 function__ if there is a constant `N >= 0` for which `f` conforms to the following:
-- 2.2. When `f` is called, `f` must decide which argument may hold the `callback`, if any.
-The decision is arbitrary, but arguments after the callback __must be ignored__.
-- 2.3. If `callback` is a function, it must be eventually called __exactly once__.
-- 2.4. `callback` must be called with one of the following argument lists:
-  - 2.4.1. `( err, arg1, arg2, ..., argN )` with arbitrary values
-  - 2.4.2. `( err )` where `err` is truthy
-  - 2.4.3. `()` if `N = 0`
-- 2.5. `callback` may be called using `callback( ... )`, `callback.apply( ... )`, `callback.call( ... )`, or any other means to execute a function.
-- 2.6. `callback` may be called directly or indirectly by `f` or other functions, immediately or at any time.
-- 2.7. `callback` should be an optional argument. If omitted, `f` should treat it like a `noop`, i.e. `function() {}`.
-- 2.8. `f` should __immediately throw__ programmer errors, e.g. argument errors.
-  - 2.8.1. In particular, if `callback` is optional, it should immediately throw an argument error if it is neither a function nor `undefined`.
-  - 2.8.2. Otherwise, it should immediately throw an argument error if `callback` is not a function.
-- 2.9. Other errors and exceptions should not be thrown, and instead be catched and passed to `callback( err )`.
-- 2.10. When `err` is truthy, it should be an object containing error and exception details.
+- 2.1. A CPS1 operation must be started by a function call.
+- 2.2. The operation must reserve the _semantically last argument_ of the function call for a callback.
+- 2.3. If the callback is not a function,
+the operation may use a default callback instead,
+or should throw an argument error immediately.
+- 2.4. The operation should not throw any exceptions besides argument errors in 2.3.
+Instead, exceptions should be caught and passed to the callback (see section E).
+- 2.5. The operation must eventually complete with one of the following actions:
 
-## 3. CPS1 Callbacks
 
-A CPS1 callback must ignore any arguments if an error is passed.
+### E. Error
 
-- 3.1. A function `callback` is a __CPS1 callback__ if it conforms to the following:
-- 3.2. When `callback` is called, and the first argument `err` is truthy, all remaining arguments __must be ignored__.
+- E1. The callback is called with an error as its first argument, immediately or at any time.
+- E2. The error value must be truthy.
+- E3. The error value should be an instance of a JavaScript error class, e.g. `Error`.
+- E4. Additional arguments may be passed to the callback. They are ignored by CPS1 callbacks.
+
+
+### S. Success
+
+- S1. The callback is called with a falsy first argument and result arguments, if any, immediately or at any time.
+- S2. The result(s) of the operation may be passed to the callback as additional arguments.
+- S3. If no results need to be passed, the callback may be called with an empty argument list.
+- S4. The number of result arguments must be obvious, and should be constant for equivalent contexts.
+- S5. In particular, if the last result value is intended to be `undefined`, it must be explicitly passed to the callback.
+
+
+### U. Uncaught Exception
+
+- U1. During the operation, an exception is thrown and not caught by the operation,
+immediately or at any time.
+- U2. Uncaught exceptions should be avoided (see 2.4.).
+
+<hr style="width: 10%">
+
+- 2.6. In any case, the callback must be called at most once by the operation.
+- 2.7. The operation must not take any actions after completion.
+
+
+## 3. CPS1 callbacks
+
+A CPS1 callback is a function which
+
+- 3.1. must reserve the first argument for an error.
+- 3.2. must ignore any other arguments if the error argument is truthy.
+- 3.3. should not throw any exceptions.
+- 3.4. should return `undefined`.
+
 
 ## 4. Notes
 
-- 4.1. Point 2.2. supports a variable number of arguments and arbitrary argument mappings,
-but forces the callback to be the last argument.
-- 4.2. Point 2.4. is designed to ensure the number of callback arguments is constant,
-while providing shortcuts for success, errors and passthroughs.
-- 4.3. The term "CPS1" was chosen because the defined functions expect a single callback which is called exactly once.
+- 4.1. Because functions may have multiple signatures and program flows,
+this specification defines abstract CPS1 operations, _not_ functions.
+This way, function calls may or may not execute a CPS1 operation, depending on arguments or context
+(that is, anything that may effect a function call, like the current program state and environment).
+- 4.2. Functions designed to be CPS1-compliant should always start a CPS1 operation when called.
+If not, it must be obvious for which arguments and context a function call starts a CPS1 operation.
+This may be achieved through documentation, comments, or function signatures.
+
 
 
 ## 5. Examples
@@ -67,7 +96,7 @@ while providing shortcuts for success, errors and passthroughs.
 ```javascript
 // 5.1
 // setTimeout is not CPS1
-// Violates 2.2.: Callback is not last argument
+// Violates 2.2: Callback is not semantically last argument.
 // function setTimeout( callback, t )
 
 // CPS1
@@ -79,8 +108,8 @@ function setTimeoutCPS1( t, callback ) {
 
 
 // 5.2
-// func is not a CPS1 function
-// Violates 2.4.: Number of callback arguments is not constant, no such N
+// func is not CPS1
+// Violates S5: Must explicitly pass undefined as a result.
 function func( one, two, callback ) {
 
 	if ( !two ) callback( null, one );
@@ -88,7 +117,7 @@ function func( one, two, callback ) {
 
 }
 
-// CPS1, N = 2
+// CPS1
 function funcCPS1( one, two, callback ) {
 
 	if ( !two ) callback( null, one, undefined );
@@ -115,6 +144,7 @@ load( function readyCPS1( err, data ) {
 
 } );
 ```
+
 
 ## 6. License
 
