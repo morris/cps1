@@ -37,7 +37,7 @@ the operation may use a default callback instead,
 or should throw an argument error immediately.
 - 2.4. The operation should not throw any exceptions besides argument errors in 2.3.
 Instead, exceptions should be caught and passed to the callback (see section E).
-- 2.5. The operation must eventually complete with one of the actions defined by sections E, S, and U.
+- 2.5. The operation must eventually complete with one of __Error__, __Success__, or __Uncaught Exception__, defined by sections E, S, and U.
 - 2.6. In any case, the callback must be called at most once by the operation.
 - 2.7. The operation must not take any actions after completion.
 
