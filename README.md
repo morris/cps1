@@ -23,7 +23,7 @@ including but not limited to `f(...)`, `call`, and `apply`.
 - 1.6. An __argument__ is an entry in the `arguments` list of a function call.
 - 1.7. In a function call, an argument is the __semantically last argument__
 if all following arguments are ignored,
-i.e. neither presence nor value may have effect on the function call.
+i.e. neither presence nor value have effect on the function call.
 
 
 ## 2. CPS1 Operations
@@ -34,10 +34,11 @@ A CPS1 operation is a hereby specified sequence of events and actions:
 - 2.2. The operation must reserve the _semantically last argument_ of the function call for a callback.
 - 2.3. If the callback is not a function,
 the operation may use a default callback instead,
-or should throw an argument error immediately.
+or should throw an argument error indicating a missing callback immediately.
 - 2.4. The operation should not throw any exceptions besides argument errors in 2.3.
 Instead, exceptions should be caught and passed to the callback (see section E).
-- 2.5. The operation must eventually complete with one of __Error__, __Success__, or __Uncaught Exception__, defined by sections E, S, and U.
+- 2.5. The operation must eventually complete with one of the
+__Error__, __Success__, or __Uncaught Exception__ actions, defined by sections E, S, and U.
 - 2.6. In any case, the callback must be called at most once by the operation.
 - 2.7. The operation must not take any actions after completion.
 
@@ -92,7 +93,7 @@ This may be achieved through documentation, comments, or function signatures.
 ```javascript
 // 5.1
 // setTimeout is not CPS1
-// Violates 2.2: Callback is not semantically last argument.
+// Violates 2.2: Callback is not the (semantically) last argument.
 // function setTimeout( callback, t )
 
 // CPS1
