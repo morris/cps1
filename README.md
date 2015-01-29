@@ -6,10 +6,15 @@ Continuation-passing style (CPS) is the predominant way of handling asynchronous
 CPS functions expect one or more callbacks, or continuations, that continue the program flow after certain events.
 Promises moved in and out of the Node.js core,
 and eventually got specified with [Promises/A+](https://promisesaplus.com/),
-but even after Node.js went back, the style used in Node.js has not been specified.
+but even after Node.js went back to CPS, the style used in Node.js was never specified.
 
 The CPS specified in this document is named __CPS1__ because it was designed to match Node.js
 which widely uses a __single callback, error-first&nbsp;CPS__.
+
+The goal is to provide a common contract on CPS for developers and users of
+asynchronous code.
+Compliance is especially desired in meta-programming, where, for example,
+promises can be generated automatically from CPS1 functions, relying on a common signature.
 
 
 ## 1. Preliminaries
@@ -143,16 +148,22 @@ load( function readyCPS1( err, data ) {
 ```
 
 
-## 6. License
+## 6. Status and Contributing
+
+This is an early draft of a proposal that is hoped to help the community.
+Please feel free to contribute by creating issues or pull requests,
+or by sending any feedback or ideas.
+
+Contributors so far:
+
+- [Morris Brodersen](mailto:mb@morrisbrodersen.de)
+
+
+## 7. License
 
 This work is dedicated to the public domain.
 
 https://creativecommons.org/publicdomain/zero/1.0/
-
-
-## 7. Contributors
-
-- [Morris Brodersen](mailto:mb@morrisbrodersen.de)
 
 
 ## 8. Acknowledgments
