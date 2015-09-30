@@ -1,8 +1,8 @@
-# Continuation-Passing Style 1 (CPS1)
+# Callback-Passing Style 1 (CPS1)
 
-__Open Specification Draft__
+__Open Standard Draft__
 
-Continuation-passing style (CPS) is the predominant way of handling asynchronous operations in JavaScript, especially in [Node.js](http://nodejs.org/).
+Callback-passing style (CPS) is the predominant way of handling asynchronous operations in JavaScript, especially in [Node.js](http://nodejs.org/).
 CPS functions expect one or more callbacks, or continuations, that continue the program flow after certain events.
 Promises moved in and out of the Node.js core,
 and eventually got specified with [Promises/A+](https://promisesaplus.com/),
@@ -50,8 +50,8 @@ __Error__, __Success__, or __Uncaught Exception__ actions, defined by sections E
 ### E. Error
 
 - E1. The callback is called with an error as its first argument, immediately or at any time.
-- E2. The error value must be truthy.
-- E3. The error value should be an instance of a JavaScript error class, e.g. `Error`.
+- E2. The error argument must be truthy.
+- E3. The error argument should be an instance of a JavaScript error class, e.g. `Error`.
 - E4. Additional arguments may be passed to the callback. They are ignored by CPS1 callbacks.
 
 
@@ -61,7 +61,7 @@ __Error__, __Success__, or __Uncaught Exception__ actions, defined by sections E
 - S2. The result(s) of the operation may be passed to the callback as additional arguments.
 - S3. If no results need to be passed, the callback may be called with an empty argument list.
 - S4. The number of result arguments must be obvious, and should be constant for equivalent contexts.
-- S5. In particular, if the last result value is intended to be `undefined`, it must be explicitly passed to the callback.
+- S5. In particular, if the last result argument is intended to be `undefined`, it must be explicitly passed to the callback.
 
 
 ### U. Uncaught Exception
@@ -92,11 +92,10 @@ If not, it must be obvious for which arguments and context a function call start
 This may be achieved through documentation, comments, or function signatures.
 
 
-
 ## 5. Examples
 
 ```javascript
-// 5.1
+// Example 5.1
 // setTimeout is not CPS1
 // Violates 2.2: Callback is not the (semantically) last argument.
 // function setTimeout( callback, t )
@@ -108,8 +107,7 @@ function setTimeoutCPS1( t, callback ) {
 
 }
 
-
-// 5.2
+// Example 5.2
 // func is not CPS1
 // Violates S5: Must explicitly pass undefined as a result.
 function func( one, two, callback ) {
@@ -127,8 +125,7 @@ function funcCPS1( one, two, callback ) {
 
 }
 
-
-// 5.3
+// Example 5.3
 // ready is not a CPS1 callback
 // Violates 3.2.: Must ignore data on error
 load( function ready( err, data ) {
@@ -150,11 +147,11 @@ load( function readyCPS1( err, data ) {
 
 ## 6. Status and Contributing
 
-This is an early draft of a proposal that is hoped to help the community.
+This is a draft of an open standard that is hoped to help the community.
 Please feel free to contribute by creating issues or pull requests,
 or by sending any feedback or ideas.
 
-Contributors so far:
+Contributors:
 
 - [Morris Brodersen](mailto:mb@morrisbrodersen.de)
 
